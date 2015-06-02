@@ -1,0 +1,21 @@
+- motivations
+- functions
+  - blocks
+- optional typing
+  - performance
+- multiple dispatch
+  - conversions
+- types
+  - composite
+  - abstract
+- parallelism
+- kmeans
+  - matrices
+  - graphing
+  - parallel
+- macros
+
+- excellent language documentation
+- links
+  - http://julialang.org/blog/2012/02/why-we-created-julia/
+  
