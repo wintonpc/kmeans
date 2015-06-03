@@ -2,7 +2,7 @@ using Gadfly
 using DataFrames
 using Color
 
-import Base: mean, repeat, min, max, string
+import Base: mean, repeat, min, max, string, copy!
 
 # types
 
@@ -81,7 +81,7 @@ end
 
 function move_centroids(samples, centroids)
     for c in centroids
-        set!(c, mean(assigned_samples(c, samples)))
+        copy!(c, mean(assigned_samples(c, samples)))
     end
 end
 
@@ -89,10 +89,10 @@ function assigned_samples(centroid, samples)
     filter(s -> s.centroid == centroid, samples)
 end
 
-function set!(centroid::Point, copy_from::Point)
-    centroid.x = copy_from.x
-    centroid.y = copy_from.y
-    centroid
+function copy!(dest::Point, src::Point)
+    dest.x = src.x
+    dest.y = src.y
+    dest
 end
 
 function make_result(seeds, samples, centroids)
