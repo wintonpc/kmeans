@@ -1,7 +1,10 @@
 using Gadfly
 using DataFrames
+using Color
 
 import Base: mean, repeat, min, max, string
+
+# types
 
 abstract AbstractPoint
 
@@ -21,6 +24,14 @@ type Cluster
     points
 end
 
+type KmeansResult
+    seeds
+    clusters
+end
+
+
+# algorithm
+
 Point(s::Sample) = Point(s.x, s.y)
 
 string(p::AbstractPoint) = @sprintf("(%f, %f)", p.x, p.y)
@@ -36,18 +47,19 @@ ys(ps::AbstractPoints) = map(p -> p.y, ps)
 mean(points::AbstractPoints) = Point(mean(xs(points)), mean(ys(points)))
 
 function kmeans(k, points)
-    samples, centroids = initialize_centroids(k, points)
+    seeds, samples, centroids = initialize_centroids(k, points)
     while (reassign_samples(samples, centroids))
         move_centroids(samples, centroids)
     end
-    make_result(samples, centroids)
+    make_result(seeds, samples, centroids)
 end
 
 function initialize_centroids(k, points)
-    centroids = points[1:k]
+    seeds = points[1:k]
+    centroids = deepcopy(seeds)
     samples = map(p -> Sample(p.x, p.y, nearest_centroid(p, centroids)), points)
     move_centroids(samples, centroids)
-    samples, centroids
+    seeds, samples, centroids
 end
 
 function reassign_samples(samples, centroids)
@@ -83,28 +95,41 @@ function set!(centroid::Point, copy_from::Point)
     centroid
 end
 
-function make_result(samples, centroids)
-    map(centroids) do c
+function make_result(seeds, samples, centroids)
+    clusters = map(centroids) do c
         Cluster(c, map(Point, assigned_samples(c, samples)))
     end
+    KmeansResult(seeds, clusters)
 end
-
+                 
 # plotting
 
 frame(points, cluster_name) = DataFrame(X=xs(points), Y=ys(points), Cluster=cluster_name)
 
-function plot_kmeans(clusters)
-    centroid_data = frame(map(cluster -> cluster.centroid, clusters), "Center")
-    sample_data = apply(vcat, map(clusters) do cluster
+function plot_kmeans(result)
+    seed_data = frame(result.seeds, "Seed")
+    centroid_data = frame(map(cluster -> cluster.centroid, result.clusters), "Center")
+    sample_data = apply(vcat, map(result.clusters) do cluster
         frame(cluster.points, string(cluster.centroid))
     end)
+    centroid_color = color(RGB(0.3, 0.3, 0.3))
+    transition_layers = make_transition_layers(result)
+    seed_layer = layer(seed_data, x="X", y="Y", Geom.point,
+                       Theme(default_color=centroid_color, default_point_size=3pt))
     centroid_layer = layer(centroid_data, x="X", y="Y", Geom.point,
-                           Theme(default_color=color("gray"), default_point_size=5pt))
+                           Theme(default_color=centroid_color, default_point_size=5pt))
     sample_layer = layer(sample_data, x="X", y="Y", color="Cluster", Geom.point)
-    plot(centroid_layer, sample_layer)
+    plot(centroid_layer, seed_layer, transition_layers..., sample_layer)
 end
 
-                                  
+function make_transition_layers(result)
+    ts = zip(result.seeds, map(c -> c.centroid, result.clusters))
+    dfs = map(t -> frame([first(t), last(t)], "Transition"), ts)
+    map(df -> layer(df, x="X", y="Y", Geom.line, Theme(default_color=color("black"))), dfs)
+end
+
+        
+
 # util
 
 function repeat(thunk::Function, n)
