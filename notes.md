@@ -18,4 +18,7 @@
 - excellent language documentation
 - links
   - http://julialang.org/blog/2012/02/why-we-created-julia/
+
+- frustrations
+  - covariance
   
