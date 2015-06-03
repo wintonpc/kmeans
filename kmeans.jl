@@ -16,7 +16,7 @@ end
 type Sample <: AbstractPoint
     x :: Float64
     y :: Float64
-    centroid :: Point
+    centroid :: Union(Point, Nothing)
 end
 
 type Cluster
@@ -33,6 +33,7 @@ end
 # algorithm
 
 Point(s::Sample) = Point(s.x, s.y)
+Sample(p::Point) = Sample(p.x, p.y, nothing)
 
 string(p::AbstractPoint) = @sprintf("(%f, %f)", p.x, p.y)
 
@@ -55,10 +56,13 @@ function kmeans(k, points)
 end
 
 function initialize_centroids(k, points)
-    seeds = points[1:k]
+    seeds = [first(points)]
+    for i=2:k
+        dist_table = Float64[dist(seeds[s], points[p]) for s=1:length(seeds), p=1:length(points)]
+        push!(seeds, points[indmax(map(min, cols(dist_table)))])
+    end
     centroids = deepcopy(seeds)
-    samples = map(p -> Sample(p.x, p.y, nearest_centroid(p, centroids)), points)
-    move_centroids(samples, centroids)
+    samples = map(Sample, points)
     seeds, samples, centroids
 end
 
@@ -150,5 +154,19 @@ function max(p::Function, xs)
 end
 
 max(p::Function) = xs -> max(p, xs)
+
+cols(mat) = [mat[:,i] for i=1:size(mat,2)]
+
+min(arr::Array{Float64,1}) = length(arr) == 1 ? arr[1] : min(arr...)
+max(arr::Array{Float64,1}) = length(arr) == 1 ? arr[1] : max(arr...)
+
+# extra
+
+function initialize_centroids_randomly(k, points)
+    seeds = points[1:k]
+    centroids = deepcopy(seeds)
+    samples = map(Sample, points)
+    seeds, samples, centroids
+end
 
 :kmeans

@@ -24,3 +24,4 @@
   - debugging
   - lambdas aren't first class as far as types are concerned
   - still under active development
+  - JITing slow?
