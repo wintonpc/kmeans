@@ -48,6 +48,13 @@ mean(points::AbstractPoints) = Point(mean(xs(points)), mean(ys(points)))
 
 function kmeans(k, points)
     seeds, samples, centroids = initialize_centroids(k, points)
+
+    function iterate()
+        while (reassign_samples())
+            move_centroids()
+        end
+        make_result()
+    end
     
     function reassign_samples()
         any(map(s -> reassign(s, nearest_centroid(s, centroids)), samples))
@@ -65,11 +72,8 @@ function kmeans(k, points)
         end
         KmeansResult(seeds, clusters)
     end
-    
-    while (reassign_samples())
-        move_centroids()
-    end
-    make_result()
+
+    iterate()
 end
 
 function initialize_centroids(k, points)
