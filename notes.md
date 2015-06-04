@@ -1,27 +1,65 @@
-- motivations
-- functions
-  - blocks
-- optional typing
-  - performance
-- multiple dispatch
-  - conversions
-- types
-  - composite
-  - abstract
-- parallelism
-- kmeans
-  - matrices
-  - graphing
-  - parallel
-- macros
+- Julia
 
-- excellent language documentation
-- links
-  - http://julialang.org/blog/2012/02/why-we-created-julia/
+- This presentation
+  - quick overview
+  - case study from compute
 
-- frustrations
-  - covariance
-  - debugging
-  - lambdas aren't first class as far as types are concerned
-  - still under active development
-  - JITing slow?
+- Motivations
+  - Better language for
+    - scientific computing
+    - machine learning
+    - data mining
+  - Steal
+    - Speed (C) (http://julialang.org/benchmarks/)
+    - Dynamic (Ruby)
+    - Macros (Lisp)
+    - Familiar notation (Matlab)
+    - Distributed (Hadoop)
+
+- Questions to ask when learning a new language?
+  - what are the primitives?
+    - the usual suspects, plus
+    - fancy linalg-oriented arrays
+    - dictionaries
+    - functions
+  - what are the means of combination?
+    - structures
+    - tuples
+  - what are the means of abstraction?
+    - functions
+    - abstract type classes
+    - parametric types
+    - multiple dispatch polymorphism
+
+- explore
+  - primitives, 
+  - arrays, matrices
+  - functions
+    - blocks
+    - optional args
+    - keyword args
+  - optional typing
+    - types
+      - composite
+      - abstract
+  - multiple dispatch
+    - promotion/conversion
+  - macros
+  - parallelism
+
+- case study
+  - k-means
+    - matrices
+    - graphing
+    - parallel
+
+- notes
+  - excellent language documentation
+  - links
+    - http://julialang.org/blog/2012/02/why-we-created-julia/
+  - frustrations
+    - no covariance (as always, the type system both solves and creates problems)
+    - lambdas aren't first class as far as types are concerned
+    - still under active development
+      - debugging support (https://www.youtube.com/watch?v=Wkw2gmzfm1Q)
+    - JITing slow?

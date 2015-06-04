@@ -1,6 +1,6 @@
 using Gadfly
 using DataFrames
-using Color
+using Color, Distributions
 
 import Base: mean, repeat, min, max, string, copy!
 
@@ -33,9 +33,8 @@ end
 # algorithm
 
 Point(s::Sample) = Point(s.x, s.y)
+Point(coord::Array) = Point(coord[1], coord[2])
 Sample(p::Point) = Sample(p.x, p.y, nothing)
-
-string(p::AbstractPoint) = @sprintf("(%f, %f)", p.x, p.y)
 
 typealias AbstractPoints{T<:AbstractPoint} Array{T, 1}
 
@@ -108,6 +107,8 @@ end
                  
 # plotting
 
+string(p::AbstractPoint) = @sprintf("(%f, %f)", p.x, p.y)
+
 frame(points, cluster_name) = DataFrame(X=xs(points), Y=ys(points), Cluster=cluster_name)
 
 function plot_kmeans(result)
@@ -123,7 +124,7 @@ function plot_kmeans(result)
     centroid_layer = layer(centroid_data, x="X", y="Y", Geom.point,
                            Theme(default_color=centroid_color, default_point_size=5pt))
     sample_layer = layer(sample_data, x="X", y="Y", color="Cluster", Geom.point)
-    plot(centroid_layer, seed_layer, transition_layers..., sample_layer)
+    plot(centroid_layer, transition_layers..., sample_layer, seed_layer, Coord.cartesian(fixed=true))
 end
 
 function make_transition_layers(result)
@@ -132,7 +133,31 @@ function make_transition_layers(result)
     map(df -> layer(df, x="X", y="Y", Geom.line, Theme(default_color=color("black"))), dfs)
 end
 
-        
+# testing
+
+function cartesian(theta, radius)
+    x = radius * cos(theta)
+    y = radius * sin(theta)
+    [x, y]
+end
+
+function gen_points(k, n, max_radius = 0.1)
+    normal_dist = Normal(0, max_radius)
+    theta_dist = Uniform(0, 2pi)
+    vcat((repeat(k) do
+        center = Point(rand(), rand())
+        repeat(n) do
+            theta = rand(theta_dist)
+            radius = rand(normal_dist)
+            Point(cartesian(theta, radius) + [center.x, center.y])
+        end
+    end)...)
+end
+
+function run(k=3)
+    plot_kmeans(kmeans(k, gen_points(k, 50)))
+end
+
 
 # util
 
@@ -157,8 +182,11 @@ max(p::Function) = xs -> max(p, xs)
 
 cols(mat) = [mat[:,i] for i=1:size(mat,2)]
 
-min(arr::Array{Float64,1}) = length(arr) == 1 ? arr[1] : min(arr...)
-max(arr::Array{Float64,1}) = length(arr) == 1 ? arr[1] : max(arr...)
+min(arr::Array{Float64,1}) = min(arr...)
+min(n::Float64) = n
+max(arr::Array{Float64,1}) = max(arr...)
+max(n::Float64) = n
+
 
 # extra
 
