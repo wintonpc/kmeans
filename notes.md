@@ -1,7 +1,7 @@
 - Julia
 
 - This presentation
-  - quick overview
+  - quick tour
   - case study from compute
 
 - Motivations
@@ -12,7 +12,7 @@
   - Steal
     - Speed (C) (http://julialang.org/benchmarks/)
     - Dynamic (Ruby)
-    - Macros (Lisp)
+    - Small core; Macros (Lisp)
     - Familiar notation (Matlab)
     - Distributed (Hadoop)
 
@@ -30,19 +30,26 @@
     - abstract type classes
     - parametric types
     - multiple dispatch polymorphism
+  - also
+    - compiled to LLVM (JIT)
+    - dynamic typing
+    - REPL
+    - IJulia
 
 - explore
-  - primitives, 
+  - primitives
   - arrays, matrices
   - functions
     - blocks
     - varargs
     - optional args
     - keyword args
-  - optional typing
-    - types
-      - composite
-      - abstract
+    - multiple return values
+  - types
+    - optional typing
+    - composite
+    - abstract
+    - covariance/contravariance
   - multiple dispatch
     - promotion/conversion
   - macros

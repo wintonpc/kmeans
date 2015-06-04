@@ -13,5 +13,5 @@ add(a::Number, b::Number) = a + b
 
 macro enable_promotion(func)
     bare_name = esc(func)
-    :( function $bare_name(args...); $bare_name(promote(args...)...); end )
+    :( $bare_name(args...) = $bare_name(promote(args...)...) )
 end
