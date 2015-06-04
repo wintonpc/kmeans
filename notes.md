@@ -5,7 +5,7 @@
   - case study from compute
 
 - Motivations
-  - Better language for
+  - Better language for math on large data sets
     - scientific computing
     - machine learning
     - data mining
@@ -16,7 +16,7 @@
     - Familiar notation (Matlab)
     - Distributed (Hadoop)
 
-- Questions to ask when learning a new language?
+- Questions to ask when learning a new language? (https://www.youtube.com/watch?v=2Op3QLzMgSY)
   - what are the primitives?
     - the usual suspects, plus
     - fancy linalg-oriented arrays
@@ -36,6 +36,7 @@
   - arrays, matrices
   - functions
     - blocks
+    - varargs
     - optional args
     - keyword args
   - optional typing
@@ -46,6 +47,7 @@
     - promotion/conversion
   - macros
   - parallelism
+  - modules
 
 - case study
   - k-means

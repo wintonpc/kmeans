@@ -142,13 +142,13 @@ function cartesian(theta, radius)
 end
 
 function gen_points(k, n, max_radius = 0.1)
-    normal_dist = Normal(0, max_radius)
-    theta_dist = Uniform(0, 2pi)
+    normal_distribution = Normal(0, max_radius)
+    theta_distribution = Uniform(0, 2pi)
     vcat((repeat(k) do
         center = Point(rand(), rand())
         repeat(n) do
-            theta = rand(theta_dist)
-            radius = rand(normal_dist)
+            theta = rand(theta_distribution)
+            radius = rand(normal_distribution)
             Point(cartesian(theta, radius) + [center.x, center.y])
         end
     end)...)
