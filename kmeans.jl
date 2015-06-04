@@ -48,10 +48,28 @@ mean(points::AbstractPoints) = Point(mean(xs(points)), mean(ys(points)))
 
 function kmeans(k, points)
     seeds, samples, centroids = initialize_centroids(k, points)
-    while (reassign_samples(samples, centroids))
-        move_centroids(samples, centroids)
+    
+    function reassign_samples()
+        any(map(s -> reassign(s, nearest_centroid(s, centroids)), samples))
     end
-    make_result(seeds, samples, centroids)
+
+    function move_centroids()
+        for c in centroids
+            copy!(c, mean(assigned_samples(c, samples)))
+        end
+    end
+    
+    function make_result()
+        clusters = map(centroids) do c
+            Cluster(c, map(Point, assigned_samples(c, samples)))
+        end
+        KmeansResult(seeds, clusters)
+    end
+    
+    while (reassign_samples())
+        move_centroids()
+    end
+    make_result()
 end
 
 function initialize_centroids(k, points)
@@ -63,10 +81,6 @@ function initialize_centroids(k, points)
     centroids = deepcopy(seeds)
     samples = map(Sample, points)
     seeds, samples, centroids
-end
-
-function reassign_samples(samples, centroids)
-    any(map(s -> reassign(s, nearest_centroid(s, centroids)), samples))
 end
 
 function nearest_centroid(point, centroids)
@@ -82,12 +96,6 @@ function reassign(sample, centroid)
     end
 end
 
-function move_centroids(samples, centroids)
-    for c in centroids
-        copy!(c, mean(assigned_samples(c, samples)))
-    end
-end
-
 function assigned_samples(centroid, samples)
     filter(s -> s.centroid == centroid, samples)
 end
@@ -98,13 +106,6 @@ function copy!(dest::Point, src::Point)
     dest
 end
 
-function make_result(seeds, samples, centroids)
-    clusters = map(centroids) do c
-        Cluster(c, map(Point, assigned_samples(c, samples)))
-    end
-    KmeansResult(seeds, clusters)
-end
-                 
 # plotting
 
 string(p::AbstractPoint) = @sprintf("(%f, %f)", p.x, p.y)
