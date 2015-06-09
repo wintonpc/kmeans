@@ -17,6 +17,7 @@ type Sample <: AbstractPoint
     x :: Float64
     y :: Float64
     centroid :: Union(Point, Nothing)
+    changed :: Bool
 end
 
 type Cluster
@@ -34,7 +35,9 @@ end
 
 Point(s::Sample) = Point(s.x, s.y)
 Point(coord::Array) = Point(coord[1], coord[2])
-Sample(p::Point) = Sample(p.x, p.y, nothing)
+Sample(p::Point) = Sample(p.x, p.y, nothing, true)
+==(a::Point, b::Point) = a.x == b.x && a.y == b.y
+!=(a::Point, b::Point) = !(a == b)
 
 typealias AbstractPoints{T<:AbstractPoint} Array{T, 1}
 
@@ -44,12 +47,16 @@ dist(a) = b -> dist(a, b)
 xs(ps::AbstractPoints) = map(p -> p.x, ps)
 ys(ps::AbstractPoints) = map(p -> p.y, ps)
 
-mean(points::AbstractPoints) = Point(mean(xs(points)), mean(ys(points)))
+mean(points::AbstractPoints) = begin
+    Point(mean(xs(points)), mean(ys(points)))
+end
 
 function kmeans(k, points)
     seeds, samples, centroids = initialize_centroids(k, points)
-    while (reassign_samples(samples, centroids))
-        move_centroids(samples, centroids)
+    while true
+        samples = reassign_samples(samples, centroids)
+        if (!reassigned_any(samples)) break; end
+        centroids = move_centroids(samples, centroids)
     end
     make_result(seeds, samples, centroids)
 end
@@ -66,7 +73,7 @@ function initialize_centroids(k, points)
 end
 
 function reassign_samples(samples, centroids)
-    any(map(s -> reassign(s, nearest_centroid(s, centroids)), samples))
+    map(s -> reassign(s, nearest_centroid(s, centroids)), samples)
 end
 
 function nearest_centroid(point, centroids)
@@ -74,28 +81,19 @@ function nearest_centroid(point, centroids)
 end
 
 function reassign(sample, centroid)
-    if sample.centroid == centroid
-        false
-    else
-        sample.centroid = centroid
-        true
-    end
+    Sample(sample.x, sample.y, centroid, sample.centroid != centroid)
 end
 
 function move_centroids(samples, centroids)
-    for c in centroids
-        copy!(c, mean(assigned_samples(c, samples)))
-    end
+    map(c -> mean(assigned_samples(c, samples)), centroids)
+end
+
+function reassigned_any(samples)
+    any(map(s -> s.changed, samples))
 end
 
 function assigned_samples(centroid, samples)
     filter(s -> s.centroid == centroid, samples)
-end
-
-function copy!(dest::Point, src::Point)
-    dest.x = src.x
-    dest.y = src.y
-    dest
 end
 
 function make_result(seeds, samples, centroids)
